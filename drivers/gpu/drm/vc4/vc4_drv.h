@@ -49,6 +49,8 @@ enum vc4_kernel_bo_type {
  * done. This way, only events related to a specific job will be counted.
  */
 struct vc4_perfmon {
+	struct vc4_dev *dev;
+
 	/* Tracks the number of users of the perfmon, when this counter reaches
 	 * zero the perfmon is destroyed.
 	 */
@@ -74,6 +76,8 @@ struct vc4_perfmon {
 
 struct vc4_dev {
 	struct drm_device base;
+
+	bool is_vc5;
 
 	unsigned int irq;
 
@@ -321,6 +325,7 @@ struct vc4_v3d {
 };
 
 struct vc4_hvs {
+	struct vc4_dev *vc4;
 	struct platform_device *pdev;
 	void __iomem *regs;
 	u32 __iomem *dlist;
@@ -339,8 +344,19 @@ struct vc4_hvs {
 
 	struct debugfs_regset32 regset;
 
-	/* HVS version 5 flag, therefore requires updated dlist structures */
-	bool hvs5;
+	/*
+	 * Even if HDMI0 on the RPi4 can output modes requiring a pixel
+	 * rate higher than 297MHz, it needs some adjustments in the
+	 * config.txt file to be able to do so and thus won't always be
+	 * available.
+	 */
+	bool vc5_hdmi_enable_scrambling;
+
+	/*
+	 * 4096x2160@60 requires a core overclock to work, so register
+	 * whether that is sufficient.
+	 */
+	bool vc5_hdmi_enable_4096by2160;
 };
 
 struct vc4_plane {
@@ -604,6 +620,8 @@ to_vc4_crtc_state(struct drm_crtc_state *crtc_state)
 #define VC4_REG32(reg) { .name = #reg, .offset = reg }
 
 struct vc4_exec_info {
+	struct vc4_dev *dev;
+
 	/* Sequence number for this bin/render job. */
 	uint64_t seqno;
 
@@ -725,6 +743,8 @@ struct vc4_exec_info {
  * released when the DRM file is closed should be placed here.
  */
 struct vc4_file {
+	struct vc4_dev *dev;
+
 	struct {
 		struct idr idr;
 		struct mutex lock;
@@ -838,9 +858,9 @@ struct vc4_validated_shader_info {
 struct drm_gem_object *vc4_create_object(struct drm_device *dev, size_t size);
 struct vc4_bo *vc4_bo_create(struct drm_device *dev, size_t size,
 			     bool from_cache, enum vc4_kernel_bo_type type);
-int vc4_dumb_create(struct drm_file *file_priv,
-		    struct drm_device *dev,
-		    struct drm_mode_create_dumb *args);
+int vc4_bo_dumb_create(struct drm_file *file_priv,
+		       struct drm_device *dev,
+		       struct drm_mode_create_dumb *args);
 int vc4_create_bo_ioctl(struct drm_device *dev, void *data,
 			struct drm_file *file_priv);
 int vc4_create_shader_bo_ioctl(struct drm_device *dev, void *data,
@@ -909,6 +929,7 @@ static inline void vc4_debugfs_add_regset32(struct drm_device *drm,
 
 /* vc4_drv.c */
 void __iomem *vc4_ioremap_regs(struct platform_device *dev, int index);
+int vc4_dumb_fixup_args(struct drm_mode_create_dumb *args);
 
 /* vc4_dpi.c */
 extern struct platform_driver vc4_dpi_driver;

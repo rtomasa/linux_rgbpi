@@ -582,6 +582,36 @@ Load:   dtoverlay=applepi-dac
 Params: <None>
 
 
+Name:   arducam-64mp
+Info:   Arducam 64MP camera module.
+        Uses Unicam 1, which is the standard camera connector on most Pi
+        variants.
+Load:   dtoverlay=arducam-64mp,<param>=<val>
+Params: rotation                Mounting rotation of the camera sensor (0 or
+                                180, default 0)
+        orientation             Sensor orientation (0 = front, 1 = rear,
+                                2 = external, default external)
+        media-controller        Configure use of Media Controller API for
+                                configuring the sensor (default on)
+        cam0                    Adopt the default configuration for CAM0 on a
+                                Compute Module (CSI0, i2c_vc, and cam0_reg).
+
+
+Name:   arducam-pivariety
+Info:   Arducam Pivariety camera module.
+        Uses Unicam 1, which is the standard camera connector on most Pi
+        variants.
+Load:   dtoverlay=arducam-pivariety,<param>=<val>
+Params: rotation                Mounting rotation of the camera sensor (0 or
+                                180, default 0)
+        orientation             Sensor orientation (0 = front, 1 = rear,
+                                2 = external, default external)
+        media-controller        Configure use of Media Controller API for
+                                configuring the sensor (default on)
+        cam0                    Adopt the default configuration for CAM0 on a
+                                Compute Module (CSI0, i2c_vc, and cam0_reg).
+
+
 Name:   at86rf233
 Info:   Configures the Atmel AT86RF233 802.15.4 low-power WPAN transceiver,
         connected to spi0.0
@@ -1044,6 +1074,17 @@ Load:   dtoverlay=gpio-fan,<param>=<val>
 Params: gpiopin                 GPIO used to control the fan (default 12)
         temp                    Temperature at which the fan switches on, in
                                 millicelcius (default 55000)
+
+
+Name:   gpio-hog
+Info:   Activate a "hog" for a GPIO - request that the kernel configures it as
+        an output, driven low or high as indicated by the presence or absence
+        of the active_low parameter. Note that a hogged GPIO is not available
+        to other drivers or for gpioset/gpioget.
+Load:   dtoverlay=gpio-hog,<param>=<val>
+Params: gpio                    GPIO pin to hog (default 26)
+        active_low              If set, the hog drives the GPIO low (defaults
+                                to off - the GPIO is driven high)
 
 
 Name:   gpio-ir
@@ -1515,6 +1556,39 @@ Load:   dtoverlay=i2c-bcm2708
 Params: <None>
 
 
+Name:   i2c-fan
+Info:   Adds support for a number of I2C fan controllers
+Load:   dtoverlay=i2c-fan,<param>=<val>
+Params: addr                    Sets the address for the fan controller. Note
+                                that the device must be configured to use the
+                                specified address.
+
+        i2c0                    Choose the I2C0 bus on GPIOs 0&1
+
+        i2c_csi_dsi             Choose the I2C0 bus on GPIOs 44&45
+
+        minpwm                  PWM setting for the fan when the SoC is below
+                                mintemp (range 0-255. default 0)
+        maxpwm                  PWM setting for the fan when the SoC is above
+                                maxtemp (range 0-255. default 255)
+        midtemp                 Temperature (in millicelcius) at which the fan
+                                begins to speed up (default 50000)
+
+        midtemp_hyst            Temperature delta (in millicelcius) below
+                                mintemp at which the fan will drop to minrpm
+                                (default 2000)
+
+        maxtemp                 Temperature (in millicelcius) at which the fan
+                                will be held at maxrpm (default 70000)
+
+        maxtemp_hyst            Temperature delta (in millicelcius) below
+                                maxtemp at which the fan begins to slow down
+                                (default 2000)
+
+        emc2301                 Select the Microchip EMC230x controller family
+                                - EMC2301, EMC2302, EMC2303, EMC2305.
+
+
 Name:   i2c-gpio
 Info:   Adds support for software i2c controller on gpio pins
 Load:   dtoverlay=i2c-gpio,<param>=<val>
@@ -1595,6 +1669,8 @@ Params: abx80x                  Select one of the ABx80x family:
 
         rv3028                  Select the Micro Crystal RV3028 device
 
+        rv8803                  Select the Micro Crystal RV8803 device
+
         sd3078                  Select the ZXW Shenzhen whwave SD3078 device
 
         s35390a                 Select the ABLIC S35390A device
@@ -1664,6 +1740,8 @@ Params: abx80x                  Select one of the ABx80x family:
         rv1805                  Select the Micro Crystal RV1805 device
 
         rv3028                  Select the Micro Crystal RV3028 device
+
+        rv8803                  Select the Micro Crystal RV8803 device
 
         sd3078                  Select the ZXW Shenzhen whwave SD3078 device
 
@@ -1914,6 +1992,21 @@ Params: 4lane                   Enable 4 CSI2 lanes. This requires a Compute
                                 2 = external, default external)
         rotation                Mounting rotation of the camera sensor (0 or
                                 180, default 0)
+        media-controller        Configure use of Media Controller API for
+                                configuring the sensor (default on)
+        cam0                    Adopt the default configuration for CAM0 on a
+                                Compute Module (CSI0, i2c_vc, and cam0_reg).
+
+
+Name:   imx296
+Info:   Sony IMX296 camera module.
+        Uses Unicam 1, which is the standard camera connector on most Pi
+        variants.
+Load:   dtoverlay=imx296,<param>=<val>
+Params: rotation                Mounting rotation of the camera sensor (0 or
+                                180, default 180)
+        orientation             Sensor orientation (0 = front, 1 = rear,
+                                2 = external, default external)
         media-controller        Configure use of Media Controller API for
                                 configuring the sensor (default on)
         cam0                    Adopt the default configuration for CAM0 on a
@@ -2785,6 +2878,10 @@ Params: speed                   Display SPI bus speed
 
         debug                   Debug output level {0-7}
 
+        drm                     Force the use of the mi0283qt DRM driver (by
+                                default the ili9340 framebuffer driver will
+                                be used in preference if available)
+
 
 Name:   pitft35-resistive
 Info:   Adafruit PiTFT 3.5" resistive touch screen
@@ -3044,10 +3141,9 @@ Params: <None>
 
 
 Name:   rpivid-v4l2
-Info:   Load the V4L2 stateless video decoder driver for the HEVC block,
-        disabling the memory mapped devices in the process.
-Load:   dtoverlay=rpivid-v4l2
-Params: <None>
+Info:   This overlay has been deprecated and deleted as the V4L2 stateless
+        video decoder driver is enabled by default.
+Load:   <Deprecated>
 
 
 Name:   rra-digidac1-wm8741-audio
